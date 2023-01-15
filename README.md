@@ -2,12 +2,12 @@
 
 How to install?
 
-pkg update && pkg upgrade
-pkg install python
-pkg install git
-git clone https://github.com/irhanftelis/Auto-Post-FB
-cd Auto Post FB
-python3 main.py
+<p><b>pkg update && pkg upgrade</b></p>
+<p><b>pkg install python</b></p>
+<p><b>pkg install git</b></p>
+<p><b>git clone https://github.com/irhanftelis/Auto-Post-FB</b></p>
+<p><b>cd Auto Post FB</b></p>
+<p><b>python3 main.py</b></p>
 
 
 #Whatsapp : https://wa.me/6281802386849
