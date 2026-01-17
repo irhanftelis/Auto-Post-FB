@@ -1,35 +1,57 @@
-import requests
-from bs4 import BeautifulSoup
-import os, sys
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service  
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait 
+from selenium.webdriver.support import expected_conditions as EC
+import os
 import time
 
-def posting(pesan, cookie):
-    grup = ["2061337210794733", "3852835338111671", "2802808803133004", "portogelofficial", "2494641837214326", "2470170899976440", "2326054951009910", "2302194580056903", "2260286497534555", "2108474526141274"]
+os.system("cls" if os.name == "nt" else "clear")
 
-    for i in range(len(grup)):
-        url = "https://mbasic.facebook.com/groups/"+grup[i]
-        with requests.session() as ses_:
-            halaman  = ses_.get(url, cookies=cookie).content
-            sop = BeautifulSoup(halaman, "html.parser")
-            form = sop.find("form", method="post")
-            url_post = form["action"]
-            payload = {}
-            for warga in form:
-                input = warga
-                payload[input.get("name")] = input.get("value")
-            
-            payload.update({"xc_message": pesan,
-                            "view_post": "Posting"
-            })
-            ses_.post("https://mbasic.facebook.com/"+url_post, cookies=cookie, data=payload)
-            print(30*"-")
-            print("Postingan : " + pesan + "\ntelah selesai di upload di: " + url)
+def main():
+    global driver
+    #setup chrome driver
+    option = webdriver.ChromeOptions()
+    option.add_argument("--maximized")
 
-def pesan():
-    os.system("cls")
-    pesan = input("Postingan : ")
-    time.sleep(3)
-    cookie = {"cookie": "sb=jtbaYH5lofiTFy_Cuey1bHxq; datr=jtbaYEnR_l1wQryaaDzClf6l; c_user=100025060763675; xs=46%3AUY1k8PxUJGiCbg%3A2%3A1673756328%3A-1%3A11067; fr=0apMcUQVxdNd63BX8.AWXiOo0a30zAHVErsK0-ko2u328.BjnFpj.s9.AAA.0.0.Bjw36o.AWWUmxo88_k; m_page_voice=100025060763675; usida=eyJ2ZXIiOjEsImlkIjoiQXJvaWVvdngzbnZ1MiIsInRpbWUiOjE2NzM3NTYzODN9; wd=1366x695"}
-    posting(pesan, cookie)
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=option)
 
-pesan()
+
+    # login facebook dengan cookie
+    driver.get("https://www.facebook.com/")
+
+    cookies = [ {"name": "c_user", "value": "100050394665203", "path": "/"}, {"name": "xs", "value": "27%3AQ-QOBXUX7bikHw%3A2%3A1768656085%3A-1%3A-1%3A%3AAczeQOG-HXLkg3eLgSM1CyRJvuOL54Q2zmrNzifRRQ", "path": "/"} ]
+    for cookie in cookies: 
+        driver.add_cookie(cookie)
+
+    print(driver.title)
+    driver.refresh()
+
+#comment function
+def comment():
+    #komentar di postingan
+    comment_box = WebDriverWait(driver, 10).until( EC.element_to_be_clickable(("xpath", "//span[contains(text(),'Komentari')]")) )
+    driver.execute_script("arguments[0].scrollIntoView();", comment_box)
+    driver.execute_script("arguments[0].click();", comment_box)
+    time.sleep(2)
+
+    #mengetik komentar
+    comment_area = WebDriverWait(driver, 10).until( EC.element_to_be_clickable(("xpath", "//div[@role='textbox']")) ) 
+    comment_area.send_keys(komen)
+
+    #submit komentar
+    post_button = driver.find_element("xpath", '//*[@id="focused-state-composer-submit"]/span/div/div')  
+    driver.execute_script("arguments[0].click();", post_button)
+
+    print("Komentar berhasil dikirim!")
+    time.sleep(delay)  # jeda antara komentar
+    driver.refresh()
+
+# i = int(input("Masukkan jumlah komentar yang diinginkan: "))
+komen = input("Masukkan komentar yang diinginkan: ")
+jumlah_comment = int(input("Masukkan jumlah komentar yang diinginkan: "))
+delay = int(input("Masukkan jeda waktu antar komentar (dalam detik): "))
+main()
+for _ in range(jumlah_comment):
+    comment()
